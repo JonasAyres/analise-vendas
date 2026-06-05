@@ -1,6 +1,4 @@
-import csv
-from collections import Counter, defaultdict
-from datetime import datetime
+import pandas as pd
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
@@ -13,10 +11,11 @@ try:
     from matplotlib.backends.backend_pdf import PdfPages
 except ImportError:
     plt = None
+    FigureCanvasTkAgg = None
+    PdfPages = None
 
 try:
     from openpyxl import Workbook
-    from openpyxl.utils import get_column_letter
 except ImportError:
     Workbook = None
 
@@ -24,61 +23,39 @@ DATA_FILE = Path(__file__).with_name("vendas.csv")
 
 
 def carregar_dados(path):
-    registros = []
     if not path.exists():
         raise FileNotFoundError(f"Arquivo de dados não encontrado: {path}")
 
-    with open(path, encoding="utf-8", newline="") as arquivo:
-        leitor = csv.DictReader(arquivo)
-        for linha in leitor:
-            try:
-                quantidade = int(linha["quantidade"])
-                preco_unitario = float(linha["preco_unitario"])
-            except (ValueError, TypeError):
-                continue
-
-            data_text = linha.get("data") or linha.get("data_venda")
-            data_obj = None
-            try:
-                data_obj = datetime.strptime(data_text, "%Y-%m-%d").date()
-            except (TypeError, ValueError):
-                pass
-
-            registros.append({
-                "data_venda": data_text,
-                "data": data_obj,
-                "produto": linha.get("produto"),
-                "categoria": linha.get("categoria"),
-                "quantidade": quantidade,
-                "preco_unitario": preco_unitario,
-                "regiao": linha.get("regiao"),
-                "receita": quantidade * preco_unitario,
-            })
-    return registros
+    df = pd.read_csv(path, parse_dates=["data"], encoding="utf-8")
+    df.rename(columns={"data": "data_venda"}, inplace=True)
+    df["receita"] = df["quantidade"] * df["preco_unitario"]
+    df["periodo"] = df["data_venda"].dt.to_period("M").astype(str)
+    df["data_venda"] = df["data_venda"].dt.strftime("%Y-%m-%d")
+    return df
 
 
-def calcular_métricas(registros):
-    total_registros = len(registros)
-    receita_total = sum(registro["receita"] for registro in registros)
-    vendas_eletronicos = [r for r in registros if r["categoria"] == "Eletrônicos"]
+def calcular_métricas(df):
+    total_registros = len(df)
+    receita_total = df["receita"].sum()
+    vendas_eletronicos = df[df["categoria"] == "Eletrônicos"].copy()
 
-    produtos = Counter()
-    regiao_valores = defaultdict(float)
-    receita_categoria = defaultdict(float)
-    receita_mensal = defaultdict(float)
-    pivot_regiao_categoria = defaultdict(lambda: defaultdict(float))
+    receita_categoria = df.groupby("categoria")["receita"].sum().sort_values(ascending=False)
+    top_produtos_quantidade = df.groupby("produto")["quantidade"].sum().sort_values(ascending=False).head(10)
+    receita_regiao = df.groupby("regiao")["receita"].sum().sort_values(ascending=False)
+    receita_mensal = df.groupby("periodo")["receita"].sum()
+    pivot_regiao_categoria = pd.pivot_table(
+        df,
+        values="receita",
+        index="regiao",
+        columns="categoria",
+        aggfunc="sum",
+        fill_value=0,
+    )
 
-    for registro in registros:
-        produtos[registro["produto"]] += registro["quantidade"]
-        regiao_valores[registro["regiao"]] += registro["receita"]
-        receita_categoria[registro["categoria"]] += registro["receita"]
-        pivot_regiao_categoria[registro["regiao"]][registro["categoria"]] += registro["receita"]
-        periodo = registro["data"].strftime("%Y-%m") if registro["data"] else registro["data_venda"][:7]
-        receita_mensal[periodo] += registro["receita"]
-
-    produto_top, quantidade_top = produtos.most_common(1)[0] if produtos else (None, 0)
-    regiao_top = max(regiao_valores, key=regiao_valores.get) if regiao_valores else None
-    valor_regiao_top = regiao_valores.get(regiao_top, 0.0)
+    produto_top = top_produtos_quantidade.index[0] if not top_produtos_quantidade.empty else None
+    quantidade_top = int(top_produtos_quantidade.iloc[0]) if not top_produtos_quantidade.empty else 0
+    regiao_top = receita_regiao.index[0] if not receita_regiao.empty else None
+    valor_regiao_top = float(receita_regiao.iloc[0]) if not receita_regiao.empty else 0.0
 
     return {
         "total_registros": total_registros,
@@ -88,14 +65,11 @@ def calcular_métricas(registros):
         "quantidade_top": quantidade_top,
         "regiao_top": regiao_top,
         "valor_regiao_top": valor_regiao_top,
-        "receita_categoria": dict(sorted(receita_categoria.items(), key=lambda item: item[1], reverse=True)),
-        "top_produtos_quantidade": dict(produtos.most_common(10)),
-        "receita_regiao": dict(sorted(regiao_valores.items(), key=lambda item: item[1], reverse=True)),
-        "receita_mensal": dict(sorted(receita_mensal.items())),
-        "pivot_regiao_categoria": {
-            regiao: dict(categorias)
-            for regiao, categorias in pivot_regiao_categoria.items()
-        },
+        "receita_categoria": receita_categoria,
+        "top_produtos_quantidade": top_produtos_quantidade,
+        "receita_regiao": receita_regiao,
+        "receita_mensal": receita_mensal,
+        "pivot_regiao_categoria": pivot_regiao_categoria,
     }
 
 
@@ -142,64 +116,40 @@ def criar_grafico(frame, dados, titulo, xlabel, ylabel, rotacao=0, tipo="bar"):
 
 
 def montar_pivot_rows(pivot):
-    categorias = sorted(
-        {categoria for categorias in pivot.values() for categoria in categorias}
-    )
+    categorias = list(pivot.columns)
     colunas = ["Região"] + categorias
     rows = []
-    for regiao in sorted(pivot.keys(), key=lambda reg: sum(pivot[reg].values()), reverse=True):
-        linha = [regiao] + [f"R$ {pivot[regiao].get(categoria, 0):,.2f}" for categoria in categorias]
+    ordenado = pivot.sort_values(by=list(pivot.columns), ascending=False)
+    for regiao in ordenado.index:
+        linha = [regiao] + [f"R$ {pivot.loc[regiao, categoria]:,.2f}" for categoria in categorias]
         rows.append(tuple(linha))
     return colunas, rows
 
 
-def exportar_para_xlsx(metricas, registros, caminho):
+def exportar_para_xlsx(metricas, caminho):
     if Workbook is None:
         raise ImportError("openpyxl não está instalado.")
 
-    workbook = Workbook()
-    resumo = workbook.active
-    resumo.title = "Resumo"
-    linhas = [
-        ("Métrica", "Valor"),
-        ("Total de registros", metricas["total_registros"]),
-        ("Receita total", f"R$ {metricas['receita_total']:,.2f}"),
-        ("Produto mais vendido", f"{metricas['produto_top']} ({metricas['quantidade_top']} unidades)"),
-        ("Região com maior valor", f"{metricas['regiao_top']} (R$ {metricas['valor_regiao_top']:,.2f})"),
-    ]
-    for linha in linhas:
-        resumo.append(linha)
+    with pd.ExcelWriter(caminho, engine="openpyxl") as writer:
+        pd.DataFrame(
+            [
+                ["Total de registros", metricas["total_registros"]],
+                ["Receita total", f"R$ {metricas['receita_total']:,.2f}"],
+                ["Produto mais vendido", f"{metricas['produto_top']} ({metricas['quantidade_top']} unidades)"],
+                ["Região com maior valor", f"{metricas['regiao_top']} (R$ {metricas['valor_regiao_top']:,.2f})"],
+            ],
+            columns=["Métrica", "Valor"],
+        ).to_excel(writer, index=False, sheet_name="Resumo")
 
-    pivot_sheet = workbook.create_sheet(title="Pivot Região x Categoria")
-    colunas_pivot, linhas_pivot = montar_pivot_rows(metricas["pivot_regiao_categoria"])
-    pivot_sheet.append(colunas_pivot)
-    for linha in linhas_pivot:
-        pivot_sheet.append(linha)
-
-    categoria_sheet = workbook.create_sheet(title="Receita por Categoria")
-    categoria_sheet.append(("Categoria", "Receita"))
-    for categoria, valor in metricas["receita_categoria"].items():
-        categoria_sheet.append((categoria, valor))
-
-    mensal_sheet = workbook.create_sheet(title="Receita Mensal")
-    mensal_sheet.append(("Período", "Receita"))
-    for periodo, valor in metricas["receita_mensal"].items():
-        mensal_sheet.append((periodo, valor))
-
-    largura_colunas = {}
-    for planilha in workbook.worksheets:
-        for linha in planilha.iter_rows(values_only=True):
-            for idx, valor in enumerate(linha, start=1):
-                largura_colunas[idx] = max(largura_colunas.get(idx, 0), len(str(valor)))
-        for idx, largura in largura_colunas.items():
-            planilha.column_dimensions[get_column_letter(idx)].width = largura + 2
-        largura_colunas.clear()
+        metricas["pivot_regiao_categoria"].to_excel(writer, sheet_name="Pivot Região x Categoria")
+        metricas["receita_categoria"].rename("Receita").to_frame().to_excel(writer, sheet_name="Receita por Categoria")
+        metricas["receita_mensal"].rename("Receita").to_frame().to_excel(writer, sheet_name="Receita Mensal")
 
     workbook.save(caminho)
 
 
 def exportar_para_pdf(metricas, caminho):
-    if plt is None:
+    if plt is None or PdfPages is None:
         raise ImportError("matplotlib não está disponível para gerar PDF.")
 
     with PdfPages(caminho) as pdf:
@@ -217,8 +167,12 @@ def exportar_para_pdf(metricas, caminho):
 
         def salvar_figura(dados, titulo, xlabel, ylabel, tipo="bar"):
             fig, ax = plt.subplots(figsize=(8, 4.5), dpi=100)
-            chaves = list(dados.keys())
-            valores = list(dados.values())
+            if hasattr(dados, "index"):
+                chaves = list(dados.index)
+                valores = list(dados.values)
+            else:
+                chaves = list(dados.keys())
+                valores = list(dados.values())
             if tipo == "line":
                 ax.plot(chaves, valores, marker="o", color="#4c72b0")
             else:
@@ -236,10 +190,10 @@ def exportar_para_pdf(metricas, caminho):
         salvar_figura(metricas["receita_mensal"], "Evolução mensal de receita", "Período", "Receita (R$)", tipo="line")
 
         pivot = metricas["pivot_regiao_categoria"]
-        categorias = sorted({cat for categorias in pivot.values() for cat in categorias})
+        categorias = list(pivot.columns)
         linhas = [tuple(["Região"] + categorias)]
-        for regiao in sorted(pivot.keys(), key=lambda reg: sum(pivot[reg].values()), reverse=True):
-            linhas.append(tuple([regiao] + [pivot[regiao].get(categoria, 0) for categoria in categorias]))
+        for regiao in pivot.index:
+            linhas.append(tuple([regiao] + [pivot.loc[regiao, categoria] for categoria in categorias]))
         fig, ax = plt.subplots(figsize=(8.27, 6), dpi=100)
         ax.axis("tight")
         ax.axis("off")
@@ -251,7 +205,7 @@ def exportar_para_pdf(metricas, caminho):
         plt.close(fig)
 
 
-def salvar_relatorio_xlsx(root, metricas, registros):
+def salvar_relatorio_xlsx(root, metricas):
     if Workbook is None:
         messagebox.showwarning(
             "Dependência ausente",
@@ -266,7 +220,7 @@ def salvar_relatorio_xlsx(root, metricas, registros):
     if not caminho:
         return
     try:
-        exportar_para_xlsx(metricas, registros, caminho)
+        exportar_para_xlsx(metricas, caminho)
         messagebox.showinfo("Exportação concluída", f"Relatório XLSX salvo em:\n{caminho}")
     except Exception as exc:
         messagebox.showerror("Erro ao exportar", str(exc))
@@ -332,14 +286,14 @@ def criar_interface(registros, métricas):
     colunas_elec = ["data_venda", "produto", "quantidade", "preco_unitario", "receita", "regiao"]
     dados_eletronicos = [
         (
-            registro["data_venda"],
-            registro["produto"],
-            registro["quantidade"],
-            f"R$ {registro['preco_unitario']:,.2f}",
-            f"R$ {registro['receita']:,.2f}",
-            registro["regiao"],
+            row["data_venda"],
+            row["produto"],
+            int(row["quantidade"]),
+            f"R$ {row['preco_unitario']:,.2f}",
+            f"R$ {row['receita']:,.2f}",
+            row["regiao"],
         )
-        for registro in métricas["vendas_eletronicos"]
+        for _, row in métricas["vendas_eletronicos"].iterrows()
     ]
     criar_treeview(eletronicos_frame, colunas_elec, [120, 180, 90, 120, 120, 120], dados_eletronicos)
 
@@ -350,15 +304,15 @@ def criar_interface(registros, métricas):
     colunas = ["data_venda", "produto", "categoria", "quantidade", "preco_unitario", "receita", "regiao"]
     dados_principais = [
         (
-            registro["data_venda"],
-            registro["produto"],
-            registro["categoria"],
-            registro["quantidade"],
-            f"R$ {registro['preco_unitario']:,.2f}",
-            f"R$ {registro['receita']:,.2f}",
-            registro["regiao"],
+            row["data_venda"],
+            row["produto"],
+            row["categoria"],
+            int(row["quantidade"]),
+            f"R$ {row['preco_unitario']:,.2f}",
+            f"R$ {row['receita']:,.2f}",
+            row["regiao"],
         )
-        for registro in registros[:5]
+        for _, row in registros.head(5).iterrows()
     ]
     criar_treeview(primeiros_frame, colunas, [100, 170, 120, 90, 120, 120, 120], dados_principais)
 
@@ -369,7 +323,7 @@ def criar_interface(registros, métricas):
     xlsx_button = ttk.Button(
         export_frame,
         text="Exportar para XLSX",
-        command=lambda: salvar_relatorio_xlsx(root, métricas, registros),
+        command=lambda: salvar_relatorio_xlsx(root, métricas),
     )
     pdf_button = ttk.Button(
         export_frame,
