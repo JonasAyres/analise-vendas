@@ -1,0 +1,101 @@
+data,produto,categoria,quantidade,preco_unitario,cliente,regiao
+2025-12-09,Headset G,Periféricos,1,2759,Fernanda,Sudeste
+2025-03-12,Armário P,Móveis,2,4516,Rafael,Norte
+2025-11-24,Mesa Escritório N,Móveis,1,4347,Rafael,Sudeste
+2025-09-14,Tênis T,Vestuário,3,3046,Ana,Norte
+2025-08-03,Boné V,Vestuário,2,4453,Bruno,Centro-Oeste
+2025-07-24,Tablet D,Eletrônicos,2,4893,Fernanda,Sudeste
+2025-05-20,Monitor B,Eletrônicos,1,3060,Lucas,Sul
+2025-07-23,Armário P,Móveis,4,2049,Maria,Sudeste
+2025-10-14,Mouse Y,Periféricos,4,81,Pedro,Centro-Oeste
+2025-06-01,Celular A,Eletrônicos,3,516,João,Centro-Oeste
+2025-04-22,Celular A,Eletrônicos,2,1018,Fernanda,Nordeste
+2025-07-10,Tênis T,Vestuário,1,4967,João,Sudeste
+2025-10-10,Armário P,Móveis,4,2434,Bruno,Norte
+2025-11-24,Notebook X,Eletrônicos,1,2670,Ana,Sul
+2025-05-30,Tablet D,Eletrônicos,4,2575,Maria,Nordeste
+2025-09-19,Notebook X,Eletrônicos,2,2778,Rafael,Norte
+2025-06-13,Mesa Escritório N,Móveis,4,693,Ana,Norte
+2025-10-25,Sofá Q,Móveis,3,1163,Carla,Nordeste
+2025-12-28,Impressora I,Periféricos,2,1910,Pedro,Norte
+2025-08-22,Headset G,Periféricos,4,141,Bruno,Nordeste
+2025-12-10,Sofá Q,Móveis,5,4580,Camila,Sudeste
+2025-07-27,Camisa R,Vestuário,5,1067,Carla,Norte
+2025-12-31,Webcam H,Periféricos,2,1787,Rafael,Sudeste
+2025-01-30,Estante O,Móveis,4,4661,Maria,Centro-Oeste
+2025-04-12,Camisa R,Vestuário,3,1576,Maria,Norte
+2025-03-30,Headset G,Periféricos,2,577,Lucas,Nordeste
+2025-11-13,Impressora I,Periféricos,5,1760,Fernanda,Sul
+2025-01-30,Notebook X,Eletrônicos,5,1006,Lucas,Sudeste
+2025-01-19,Impressora I,Periféricos,1,305,Maria,Centro-Oeste
+2025-01-09,Teclado Z,Periféricos,5,4737,Bruno,Sudeste
+2025-08-14,Cadeira Gamer M,Móveis,5,2649,Pedro,Nordeste
+2025-06-03,Sofá Q,Móveis,4,4251,Pedro,Norte
+2025-07-07,Tablet D,Eletrônicos,2,2533,Camila,Sul
+2025-11-20,Notebook X,Eletrônicos,4,3998,Pedro,Nordeste
+2025-07-23,Tênis T,Vestuário,5,2956,Maria,Nordeste
+2025-04-01,Tênis T,Vestuário,3,4972,Rafael,Nordeste
+2025-08-01,Fone C,Eletrônicos,5,2433,Pedro,Sul
+2025-06-22,Sofá Q,Móveis,3,3494,Camila,Sul
+2025-01-27,Headset G,Periféricos,2,4491,Ana,Nordeste
+2025-12-30,Sofá Q,Móveis,5,187,Fernanda,Sudeste
+2025-10-06,Jaqueta S,Vestuário,4,1863,Bruno,Sul
+2025-08-06,Fone C,Eletrônicos,5,246,Rafael,Sudeste
+2025-06-10,Boné V,Vestuário,1,3993,Ana,Sul
+2025-02-24,Mesa Escritório N,Móveis,2,1142,Ana,Centro-Oeste
+2025-05-25,Monitor B,Eletrônicos,2,3607,Lucas,Sul
+2025-03-13,Sofá Q,Móveis,4,1534,Fernanda,Nordeste
+2025-05-30,Sofá Q,Móveis,3,2243,João,Sudeste
+2025-04-18,Cadeira Gamer M,Móveis,2,4824,Maria,Centro-Oeste
+2025-01-11,Estante O,Móveis,3,2212,Maria,Norte
+2025-07-05,Fone C,Eletrônicos,4,2864,Fernanda,Sudeste
+2025-12-05,Impressora I,Periféricos,3,4051,Pedro,Sudeste
+2025-06-02,Estante O,Móveis,3,4519,Lucas,Sul
+2025-10-05,Impressora I,Periféricos,1,3349,Bruno,Sudeste
+2025-02-13,Impressora I,Periféricos,2,4602,Rafael,Sudeste
+2025-04-01,Fone C,Eletrônicos,2,4350,Lucas,Centro-Oeste
+2025-04-09,Celular A,Eletrônicos,3,4362,Pedro,Norte
+2025-06-25,Cadeira Gamer M,Móveis,5,1298,Fernanda,Sul
+2025-09-27,Headset G,Periféricos,4,1518,Fernanda,Norte
+2025-03-25,Jaqueta S,Vestuário,5,3473,Bruno,Sudeste
+2025-09-24,Mesa Escritório N,Móveis,4,3356,Rafael,Sudeste
+2025-10-05,Celular A,Eletrônicos,2,2742,Pedro,Norte
+2025-06-06,Boné V,Vestuário,4,3364,Pedro,Nordeste
+2025-11-29,Fone C,Eletrônicos,5,2798,Lucas,Norte
+2025-03-12,Armário P,Móveis,4,2145,João,Norte
+2025-08-20,Webcam H,Periféricos,5,2022,Bruno,Sudeste
+2025-08-06,Camisa R,Vestuário,4,2112,Camila,Sudeste
+2025-02-24,Mouse Y,Periféricos,2,2911,Ana,Centro-Oeste
+2025-09-08,Teclado Z,Periféricos,3,1407,Pedro,Sudeste
+2025-12-01,Headset G,Periféricos,3,2395,Pedro,Sul
+2025-01-06,Calça U,Vestuário,3,734,Carla,Sudeste
+2025-09-12,Camisa R,Vestuário,3,2270,Carla,Sul
+2025-10-12,Tablet D,Eletrônicos,2,4147,João,Sul
+2025-03-27,Estante O,Móveis,3,2119,Bruno,Sudeste
+2025-08-15,Monitor B,Eletrônicos,5,3644,Pedro,Sudeste
+2025-02-13,Headset G,Periféricos,3,537,Lucas,Norte
+2025-08-08,Jaqueta S,Vestuário,4,4694,Carla,Sudeste
+2025-03-19,Celular A,Eletrônicos,5,922,Lucas,Sul
+2025-07-08,Boné V,Vestuário,3,3582,Rafael,Sudeste
+2025-07-28,Sofá Q,Móveis,1,154,João,Sul
+2025-08-16,Cadeira Gamer M,Móveis,4,939,Maria,Norte
+2025-03-16,Notebook X,Eletrônicos,3,4518,Rafael,Sul
+2025-02-25,Mouse Y,Periféricos,4,3741,Pedro,Sul
+2025-08-16,Mouse Y,Periféricos,3,257,Fernanda,Sul
+2025-11-13,Fone C,Eletrônicos,5,4939,Rafael,Centro-Oeste
+2025-03-01,Boné V,Vestuário,3,3169,Fernanda,Nordeste
+2025-03-18,Notebook X,Eletrônicos,1,4603,Ana,Centro-Oeste
+2025-04-02,Sofá Q,Móveis,2,4974,Pedro,Norte
+2025-12-24,Jaqueta S,Vestuário,4,4651,Pedro,Sul
+2025-06-15,Calça U,Vestuário,4,1925,Ana,Sul
+2025-05-24,Estante O,Móveis,4,3577,Ana,Centro-Oeste
+2025-08-26,Monitor B,Eletrônicos,2,2718,Carla,Sudeste
+2025-01-04,Notebook X,Eletrônicos,1,1612,Pedro,Nordeste
+2025-08-29,Impressora I,Periféricos,3,4805,Fernanda,Centro-Oeste
+2025-10-01,Impressora I,Periféricos,1,4326,Bruno,Centro-Oeste
+2025-03-05,Webcam H,Periféricos,3,144,Fernanda,Norte
+2025-02-08,Impressora I,Periféricos,3,4561,Fernanda,Nordeste
+2025-10-16,Celular A,Eletrônicos,1,2046,Carla,Sul
+2025-03-15,Celular A,Eletrônicos,5,4390,Carla,Nordeste
+2025-02-07,Calça U,Vestuário,5,2472,Rafael,Norte
+2025-05-06,Camisa R,Vestuário,4,3800,Maria,Centro-Oeste

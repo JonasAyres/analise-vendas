@@ -1,0 +1,23 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env
+.venv
+venv/
+ENV/
+
+# Editor directories
+.vscode/
+.idea/
+
+# macOS files
+.DS_Store
+
+# Generated files
+*.log
+*.png
+*.pdf
+*.xlsx
